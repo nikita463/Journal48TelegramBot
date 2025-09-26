@@ -1,0 +1,62 @@
+import asyncio
+from gen_messages import gen_today_diary, gen_tomorrow_diary, gen_week_diary_msg
+from formatutils import check_user
+import globals
+from datetime import date
+from config import config
+
+from aiogram import Bot, Dispatcher, F
+from aiogram.filters import Command
+from aiogram.types import Message, CallbackQuery
+
+token = config.token
+bot = Bot(token)
+dp = Dispatcher()
+whitelistusers = [1758224988, 5117105530]
+
+
+@dp.message(Command("start"))
+async def handle_start(message: Message):
+    if check_user(message.from_user, whitelistusers): return
+
+    text = ("/today - Расписание на сегодня\n"
+            "/tomorrow - Расписание на завтра\n"
+            "/week - расписание на неделю")
+    await message.answer(text)
+
+@dp.message(Command("today"))
+async def handle_today_timetable(message: Message):
+    if check_user(message.from_user, whitelistusers): return
+
+    await message.answer(**gen_today_diary(globals.data.student_name))
+
+@dp.message(Command("tomorrow"))
+async def handle_tomorrow_timetable(message: Message):
+    if check_user(message.from_user, whitelistusers): return
+
+    await message.answer(**gen_tomorrow_diary(globals.data.student_name))
+
+@dp.message(Command("week"))
+async def handle_week_timetable(message: Message):
+    if check_user(message.from_user, whitelistusers): return
+
+    await message.answer(**gen_week_diary_msg(date.today(), globals.data.student_name))
+
+@dp.callback_query(F.data.startswith("week_timetable"))
+async def callback_week_timetable(callback: CallbackQuery):
+    if check_user(callback.from_user, whitelistusers): return
+
+    callback_data = callback.data.removeprefix("week_timetable_")
+    next_date = date.fromisoformat(callback_data)
+
+    await callback.answer()
+    await callback.message.edit_text(**gen_week_diary_msg(next_date, globals.data.student_name))
+
+
+async def main():
+    update_diary_interval = 10 * 60
+    await globals.load_data("data.json")
+    await globals.run_update_diary(update_diary_interval)
+    await dp.start_polling(bot)
+
+asyncio.run(main())
