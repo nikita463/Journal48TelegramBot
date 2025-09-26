@@ -2,3 +2,4 @@
 .venv
 config.json
 data.json
+src/test.py
