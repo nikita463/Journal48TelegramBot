@@ -22,11 +22,18 @@ async def run_at(run_time: datetime, coro, *args, **kwargs):
     delay = (run_time - now).total_seconds()
     if delay > 0:
         await asyncio.sleep(delay)
-    return await coro(*args, **kwargs)
+    try:
+        return await coro(*args, **kwargs)
+    except Exception as exp:
+        print("[ERROR] run_every()" + str(exp))
+        return None
 
 async def run_every(interval: float, coro, *args, **kwargs):
     while True:
-        await coro(*args, **kwargs)
+        try:
+            await coro(*args, **kwargs)
+        except Exception as exp:
+            print("[ERROR] run_every()" + str(exp))
         await asyncio.sleep(interval)
 
 async def load_data(json_path: str):
