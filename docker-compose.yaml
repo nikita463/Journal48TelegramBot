@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   app:
     image: xupdates/journal48telegrambot-app
