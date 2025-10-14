@@ -50,7 +50,11 @@ async def callback_week_timetable(callback: CallbackQuery):
     next_date = date.fromisoformat(callback_data)
 
     await callback.answer()
-    await callback.message.edit_text(**gen_week_diary_msg(next_date, globals.data.student_name))
+    try:
+        await callback.message.edit_text(**gen_week_diary_msg(next_date, globals.data.student_name))
+    except TelegramBadRequest as exp:
+        if "message is not modified" not in exp.message:
+            print("[ERROR]", exp.message)
 
 
 async def main():
