@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y locales \
 ENV LANG=ru_RU.UTF-8
 ENV LANGUAGE=ru_RU:ru
 ENV LC_ALL=ru_RU.UTF-8
+ENV PYTHONIOENCODING=utf-8
 
 COPY requirements.txt .
 
