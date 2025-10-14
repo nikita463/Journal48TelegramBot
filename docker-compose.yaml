@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   app:
-    build: .
+    image: xupdates/journal48telegrambot-app
     container_name: schools48bot
     environment:
       - PYTHONUNBUFFERED=1
