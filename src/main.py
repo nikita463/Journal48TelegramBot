@@ -3,18 +3,19 @@ from gen_messages import gen_today_diary, gen_tomorrow_diary, gen_week_diary_msg
 from formatutils import check_user
 import globals
 from datetime import date
-from config import config
+from dotenv import load_dotenv
+from os import getenv
 
 from aiogram import Bot, Dispatcher, F
 from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery
 from aiogram.exceptions import TelegramBadRequest
 
-token = config.token
+load_dotenv(".env")
+token = getenv("BOT_TOKEN", "")
+whitelistusers = list(map(int, getenv("WHITELISTUSERS", "").split(",")))
 bot = Bot(token)
 dp = Dispatcher()
-whitelistusers = [1758224988, 5117105530]
-
 
 @dp.message(Command("start"))
 async def handle_start(message: Message):
