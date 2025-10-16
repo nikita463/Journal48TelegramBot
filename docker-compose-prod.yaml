@@ -5,5 +5,5 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
     volumes:
-      - ./config.json:/app/config.json
+      - ./.env:/app/.env
       - ./data.json:/app/data.json
