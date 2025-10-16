@@ -1,11 +1,12 @@
 import asyncio
-from api.api import get_diary, get_vendors
-from api.typings import List, Student
-from typing import Dict, Any
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 from dataclasses import dataclass
 import json
+
+from api.api import get_diary, get_vendors
+from api.typings import List, Student
+from utils import run_every
 
 TZ = ZoneInfo("Europe/Moscow")
 
@@ -16,25 +17,6 @@ class Data:
 
 data: Data | None = None
 weeks_diary: List[Student] = []
-
-async def run_at(run_time: datetime, coro, *args, **kwargs):
-    now = datetime.now()
-    delay = (run_time - now).total_seconds()
-    if delay > 0:
-        await asyncio.sleep(delay)
-    try:
-        return await coro(*args, **kwargs)
-    except Exception as exp:
-        print("[ERROR] run_every()" + str(exp))
-        return None
-
-async def run_every(interval: float, coro, *args, **kwargs):
-    while True:
-        try:
-            await coro(*args, **kwargs)
-        except Exception as exp:
-            print("[ERROR] run_every()" + str(exp))
-        await asyncio.sleep(interval)
 
 async def load_data(json_path: str):
     global data
