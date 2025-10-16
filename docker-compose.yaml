@@ -1,6 +1,6 @@
 services:
   app:
-    image: xupdates/journal48telegrambot-app
+    build: .
     container_name: schools48bot
     environment:
       - PYTHONUNBUFFERED=1
