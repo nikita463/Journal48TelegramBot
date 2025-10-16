@@ -15,5 +15,6 @@ def get_message_args(text: str) -> set:
     return {*args[1:]} if len(args) > 0 else {}
 
 def check_user(user: User, whitelistusers) -> bool:
-    if user.id not in whitelistusers: return True
+    if user.id not in whitelistusers:
+        print(f"Request from unknown user, id: {user.id}, username: {user.username}")
     return False
