@@ -1,5 +1,5 @@
 import asyncio
-from typing import List, Dict
+from typing import Dict
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 from dataclasses import dataclass
@@ -40,8 +40,8 @@ async def update_diary():
     start_of_next_week = start_of_current_week + timedelta(days=7)
     end_of_next_week = start_of_next_week + timedelta(days=6)
 
-    current_week_diary = await get_diary(start_of_current_week, end_of_current_week, vendor)
-    next_week_diary = await get_diary(start_of_next_week, end_of_next_week, vendor)
+    current_week_diary = await get_diary(start_of_current_week, end_of_current_week, vendor, data.student_name)
+    next_week_diary = await get_diary(start_of_next_week, end_of_next_week, vendor, data.student_name)
 
     weeks_diary.clear()
     weeks_diary.update(current_week_diary)

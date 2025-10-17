@@ -14,14 +14,14 @@ async def get_aiohttp_session() -> aiohttp.ClientSession:
         aiohttp_session = aiohttp.ClientSession(headers=HEADERS)
     return aiohttp_session
 
-async def get_diary(start: date, end: date, vendor: Vendor) -> Dict[str, Student]:
+async def get_diary(start: date, end: date, vendor: Vendor, student_name: str) -> Dict[str, Student]:
     await get_aiohttp_session()
 
     days = f"{start:%Y%m%d}-{end:%Y%m%d}"
     params = {
         **PARAMS,
         "auth_token": vendor.token,
-        "student": "1728", # TODO,
+        "student": student_name,
         "vendor": vendor.vendor,
         "days": days
     }
