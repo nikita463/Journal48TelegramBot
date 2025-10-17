@@ -1,8 +1,10 @@
 import aiohttp
+from typing import Dict
+from datetime import date
 
 from .consts import *
 from .parser import parse_diary, parse_vendors
-from .typings import *
+from .typings import Vendor, Student
 
 aiohttp_session: aiohttp.ClientSession | None = None
 
@@ -12,7 +14,7 @@ async def get_aiohttp_session() -> aiohttp.ClientSession:
         aiohttp_session = aiohttp.ClientSession(headers=HEADERS)
     return aiohttp_session
 
-async def get_diary(start: date, end: date, vendor: Vendor) -> List[Student]:
+async def get_diary(start: date, end: date, vendor: Vendor) -> Dict[str, Student]:
     await get_aiohttp_session()
 
     days = f"{start:%Y%m%d}-{end:%Y%m%d}"

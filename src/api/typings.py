@@ -17,8 +17,9 @@ class Homework:
 @dataclass
 class Lesson:
     name: str = ""
+    date: date = date(2000, 1, 1)
     homeworks: List[Homework] = field(default_factory=list)
-    lesson_id: int = 0
+    id: int = 0
     num: int = 0
     room: str = ""
     teacher: str = ""

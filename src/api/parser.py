@@ -34,7 +34,7 @@ def parse_homeworks(js: Dict[str, Any]) -> List[Homework]:
 
 def parse_lesson(js: Dict[str, Any]) -> Lesson:
     result = Lesson(
-        lesson_id=js["lesson_id"],
+        id=js["lesson_id"],
         name=js["name"],
         num=js["num"],
         room=js["room"],
@@ -58,7 +58,9 @@ def parse_day(js: Dict[str, Any]) -> Day:
 
     for key in js["items"]:
         item = js["items"][key]
-        result.lessons.append(parse_lesson(item))
+        lesson = parse_lesson(item)
+        lesson.date = result.date
+        result.lessons.append(lesson)
 
     return result
 
@@ -69,10 +71,11 @@ def parse_student(js: Dict[str, Any]) -> Student:
         days=[parse_day(js["days"][e]) for e in js["days"]]
     )
 
-def parse_diary(js: Dict[str, Any]) -> List[Student]:
-    result = []
+def parse_diary(js: Dict[str, Any]) -> Dict[str, Student]:
+    result = dict()
     for key, elem in js["response"]["result"]["students"].items():
-        result.append(parse_student(elem))
+        student = parse_student(elem)
+        result[student.name] = student
     return result
 
 def parse_vendors(js: Dict[str, Any]) -> List[Vendor]:

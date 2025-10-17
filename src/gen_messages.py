@@ -1,10 +1,11 @@
 from datetime import date, timedelta
 import locale
+from typing import List
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from utils import find_by_date
 from api.typings import Homework, Lesson, Day
-from globals import weeks_diary
+from globals import weeks_diary, homeworks_dict
 
 locale.setlocale(locale.LC_TIME, "ru_RU.UTF-8")
 
@@ -51,14 +52,14 @@ def get_lesson_emoji(name: str) -> str:
         print("Unexpected subject:", name)
         return ""
 
-def gen_homework_description(homework: Homework):
+def gen_homework_description(homework: Homework) -> str:
     result = f"<i>{homework.text}</i>"
     for file in homework.files:
         result += f'\n  <a href="{file.link}">🖇 {file.filename}</a>'
     result += "\n"
     return result
 
-def gen_lesson_description(lesson: Lesson):
+def gen_lesson_description(lesson: Lesson) -> str:
     result = ""
     lesson_emoji = get_lesson_emoji(lesson.name)
     if lesson.start:
@@ -76,8 +77,8 @@ def gen_lesson_description(lesson: Lesson):
         result += "</blockquote>"
     return result
 
-def gen_day_title(dt: date, name: str):
-    formatted_date = dt.strftime("%A, %d %b %Y")
+def gen_day_title(dt: date, name: str) -> str:
+    formatted_date = dt.strftime("%A, %d %B %Y")
     formatted_date = formatted_date[0].upper() + formatted_date[1:]
     if name != "":
         return "📅 <b>" + name + " — " + formatted_date + "</b>"
@@ -89,19 +90,23 @@ def gen_diary(day: Day, name: str) -> str:
         result += f"\n{i + 1}) " + gen_lesson_description(lesson)
     return result
 
-def gen_day_diary(dt: date, student_name: str):
-    day = find_by_date(weeks_diary, dt, student_name)
-    name = ""
+def get_day_name(dt: date, upper: bool) -> str:
     if dt == date.today() - timedelta(days=2):
-        name = "Позавчера"
+        return "Позавчера" if upper else "позавчера"
     elif dt == date.today() - timedelta(days=1):
-        name = "Вчера"
+        return "Вчера" if upper else "вчера"
     elif dt == date.today():
-        name = "Сегодня"
+        return "Сегодня" if upper else "сегодня"
     elif dt == date.today() + timedelta(days=1):
-        name = "Завтра"
+        return "Завтра" if upper else "завтра"
     elif dt == date.today() + timedelta(days=2):
-        name = "Послезавтра"
+        return "Послезавтра" if upper else "послезавтра"
+    else:
+        return ""
+
+def gen_day_diary(dt: date, student_name: str) -> str:
+    day = find_by_date(weeks_diary, dt, student_name)
+    name = get_day_name(dt, True)
     if day is None:
         result = gen_day_title(dt, name) + "\n\n"
         result += "На этот день уроков нет\n"
@@ -160,5 +165,35 @@ def gen_week_diary_msg(next_date: date, student_name: str) -> dict:
     return {
         "text": text,
         "reply_markup": keyboard,
+        "parse_mode": "HTML"
+    }
+
+
+def gen_homeworks_list(dt: date, student_name: str) -> str:
+    result = "📝 <b>Домашние задания на "
+    name = get_day_name(dt, False)
+    if name != "":
+        result += name + ", "
+    result += dt.strftime("%A, %d %B %Y").lower() + "</b>\n\n"
+
+    hw_lessons: List[Lesson] = []
+    for lesson_id, lesson in homeworks_dict[student_name].items():
+        if lesson.date == dt:
+            hw_lessons.append(lesson)
+    ind = 1
+    for lesson in sorted(hw_lessons, key=lambda x: (x.date, x.start)):
+        result += f"{ind}) " + gen_lesson_description(lesson) + "\n"
+        ind += 1
+
+    return result
+
+def gen_next_homeworks_list(student_name: str) -> dict:
+    dt = date.today() + timedelta(days=1)
+    if dt.weekday() == 5:
+        dt += timedelta(days=2)
+    elif dt.weekday() == 6:
+        dt += timedelta(days=1)
+    return {
+        "text": gen_homeworks_list(dt, student_name),
         "parse_mode": "HTML"
     }
