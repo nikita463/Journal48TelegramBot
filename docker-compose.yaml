@@ -2,8 +2,6 @@ services:
   app:
     build: .
     container_name: schools48bot
-    environment:
-      - PYTHONUNBUFFERED=1
     volumes:
       - ./.env:/app/.env
       - ./data.json:/app/data.json

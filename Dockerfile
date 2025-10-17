@@ -11,6 +11,8 @@ ENV LANGUAGE=ru_RU:ru
 ENV LC_ALL=ru_RU.UTF-8
 ENV PYTHONIOENCODING=utf-8
 
+ENV PYTHONUNBUFFERED=1
+
 COPY requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
