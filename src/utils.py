@@ -1,4 +1,5 @@
 import asyncio
+import traceback
 from datetime import datetime
 from typing import List,Optional
 from datetime import date
@@ -15,6 +16,7 @@ async def run_at(run_time: datetime, coro, *args, **kwargs):
         return await coro(*args, **kwargs)
     except Exception as exp:
         print("[ERROR] run_every()" + str(exp))
+        traceback.print_exc()
         return None
 
 async def run_every(interval: float, coro, *args, **kwargs):
@@ -23,6 +25,7 @@ async def run_every(interval: float, coro, *args, **kwargs):
             await coro(*args, **kwargs)
         except Exception as exp:
             print("[ERROR] run_every()" + str(exp))
+            traceback.print_exc()
         await asyncio.sleep(interval)
 
 def find_by_date(students: List[Student], target_date: date, student_name) -> Optional[Day]:
