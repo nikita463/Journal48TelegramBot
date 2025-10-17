@@ -1,8 +1,9 @@
-from .typings import Day, Lesson, Homework, File, Vendor, Student
 from typing import List, Dict, Any
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from copy import deepcopy
+
+from .typings import Day, Lesson, Homework, File, Vendor, Student
 
 def parse_homeworks(js: Dict[str, Any]) -> List[Homework]:
     jsHomeworks = {}

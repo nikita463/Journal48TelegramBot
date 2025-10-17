@@ -1,9 +1,10 @@
 from datetime import date, timedelta
 import locale
-from formatutils import find_by_date
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+
+from utils import find_by_date
 from api.typings import Homework, Lesson, Day
 from globals import weeks_diary
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 locale.setlocale(locale.LC_TIME, "ru_RU.UTF-8")
 

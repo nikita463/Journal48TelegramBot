@@ -1,10 +1,11 @@
 import asyncio
-from gen_messages import gen_today_diary, gen_tomorrow_diary, gen_week_diary_msg
-from formatutils import check_user
-import globals
 from datetime import date
 from dotenv import load_dotenv
 from os import getenv
+
+import globals
+from gen_messages import gen_today_diary, gen_tomorrow_diary, gen_week_diary_msg
+from utils import check_user
 
 from aiogram import Bot, Dispatcher, F
 from aiogram.filters import Command

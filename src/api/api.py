@@ -1,4 +1,5 @@
 import aiohttp
+
 from .consts import *
 from .parser import parse_diary, parse_vendors
 from .typings import *
