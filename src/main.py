@@ -4,8 +4,8 @@ from dotenv import load_dotenv
 from os import getenv
 
 import globals
-from gen_messages import gen_today_diary, gen_tomorrow_diary, gen_week_diary_msg, gen_week_homeworks_list
-from utils import check_user
+from gen_messages import gen_today_diary, gen_tomorrow_diary, gen_week_diary_msg, gen_week_homeworks_list, gen_lesson_detail
+from utils import check_user, find_by_date
 
 from aiogram import Bot, Dispatcher, F
 from aiogram.filters import Command
@@ -76,6 +76,30 @@ async def callback_week_timetable(callback: CallbackQuery):
     await callback.answer()
     try:
         await callback.message.edit_text(**gen_week_homeworks_list(next_date, globals.data.student_name))
+    except TelegramBadRequest as exp:
+        if "message is not modified" not in exp.message:
+            print("[ERROR]", exp.message)
+
+
+@dp.callback_query(F.data == "tip_lesson_detail")
+async def callback_week_timetable(callback: CallbackQuery):
+    if check_user(callback.from_user, whitelistusers): return
+
+    await callback.answer(text="Нажмите на кнопку с номером урока, чтобы получить его подробное описание", show_alert=True)
+
+@dp.callback_query(F.data.startswith("lesson_detail"))
+async def callback_week_timetable(callback: CallbackQuery):
+    if check_user(callback.from_user, whitelistusers): return
+
+    callback_data = callback.data.removeprefix("lesson_detail_")
+    lesson_num = int(callback_data[:callback_data.find("_")])
+
+    callback_data = callback_data[callback_data.find("_") + 1:]
+    lesson_date = date.fromisoformat(callback_data)
+
+    await callback.answer()
+    try:
+        await callback.message.edit_text(**gen_lesson_detail(lesson_date, lesson_num, globals.data.student_name))
     except TelegramBadRequest as exp:
         if "message is not modified" not in exp.message:
             print("[ERROR]", exp.message)

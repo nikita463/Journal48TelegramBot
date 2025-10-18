@@ -59,13 +59,25 @@ def gen_homework_description(homework: Homework) -> str:
     result += "\n"
     return result
 
-def gen_lesson_description(lesson: Lesson) -> str:
+def gen_lesson_description(lesson: Lesson, end_time: bool = False, room: bool = False, topic: bool = False, teacher: bool = False) -> str:
     result = ""
     lesson_emoji = get_lesson_emoji(lesson.name)
     if lesson.start:
-        result += f"{lesson.start:%H:%M} — {lesson_emoji} <b>{lesson.name}</b> — <b>кабинет {lesson.room}</b>\n"
+        result += f"{lesson.start:%H:%M}"
+        if end_time and lesson.end:
+            result += f" - {lesson.end:%H:%M}"
+        result += f" — "
+    result += f"{lesson_emoji} <b>{lesson.name}</b>"
+
+    if room:
+        result += f"\n\n<b>Кабинет:</b> {lesson.room}\n"
     else:
-        result += f"{lesson_emoji} <b>{lesson.name}</b> — <b>кабинет {lesson.room}</b>\n"
+        result += f" — <b>кабинет {lesson.room}</b>\n"
+    if teacher: result += f"<b>Учитель:</b> {lesson.teacher}\n"
+    if topic and len(lesson.topic) > 0: result += f"<b>Тема:</b> {lesson.topic}\n"
+    if room or topic or teacher:
+        result += "\n"
+
     if len(lesson.homeworks) > 0:
         result += "<blockquote>📝 <i>ДЗ:</i>"
         if len(lesson.homeworks) == 1:
@@ -174,16 +186,14 @@ def gen_day_homeworks_list(dt: date, student_name: str) -> str:
     name = get_day_name(dt, False)
     if name != "":
         result += name + ", "
-    result += dt.strftime("%A, %d %B %Y").lower() + "</b>\n\n"
+    result += dt.strftime("%d %B %Y").lower() + "</b>\n\n"
 
     hw_lessons: List[Lesson] = []
     for lesson in homeworks_list[student_name]:
         if lesson.date == dt:
             hw_lessons.append(lesson)
-    ind = 1
     for lesson in sorted(hw_lessons, key=lambda x: (x.date, x.start)):
-        result += f"{ind}) " + gen_lesson_description(lesson) + "\n"
-        ind += 1
+        result += f"{lesson.num}) " + gen_lesson_description(lesson) + "\n"
 
     return result
 
@@ -221,11 +231,52 @@ def gen_week_homeworks_list(next_date: date, student_name: str) -> dict:
             callback_data=f"homeworks_list_" + next_week_date.isoformat()
         )
 
-    text = gen_day_homeworks_list(monday + timedelta(st_day), student_name)
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[date_buttons[:2], date_buttons[2:], [change_week_button]])
+    lessons_button_tip = InlineKeyboardButton(text="Подробности уроков", callback_data="tip_lesson_detail")
+
+    lessons_buttons = []
+    for lesson in homeworks_list[student_name]:
+        if lesson.date == monday + timedelta(days=st_day):
+            lessons_buttons.append(InlineKeyboardButton(
+                text=lesson.num,
+                callback_data=f"lesson_detail_{int(lesson.num) - 1}_{(monday + timedelta(days=st_day)).isoformat()}"
+            ))
+
+    text = gen_day_homeworks_list(monday + timedelta(days=st_day), student_name)
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [lessons_button_tip],
+        lessons_buttons,
+        date_buttons[:2],
+        date_buttons[2:],
+        [change_week_button]
+    ])
 
     return {
         "text": text,
+        "reply_markup": keyboard,
+        "parse_mode": "HTML"
+    }
+
+
+def gen_lesson_detail(dt: date, lesson_num: int, student_name: str) -> dict:
+    lesson = find_by_date(weeks_diary, dt, student_name).lessons[lesson_num]
+
+    result = f"<b>📚 {lesson.num}-й урок — "
+    name = get_day_name(lesson.date, False)
+    if name != "":
+        result += f"{name}, "
+    result += lesson.date.strftime("%d %B %Y").lower() + "</b>\n\n"
+    result += gen_lesson_description(lesson, end_time=True, room=True, topic=True, teacher=True)
+
+    return_button = InlineKeyboardButton(
+        text="Назад",
+        callback_data=f"homeworks_list_{lesson.date.isoformat()}"
+    )
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [return_button]
+    ])
+
+    return {
+        "text": result,
         "reply_markup": keyboard,
         "parse_mode": "HTML"
     }
