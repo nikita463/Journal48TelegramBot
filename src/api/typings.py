@@ -20,9 +20,10 @@ class Lesson:
     date: date = date(2000, 1, 1)
     homeworks: List[Homework] = field(default_factory=list)
     id: int = 0
-    num: int = 0
+    num: str = 0
     room: str = ""
     teacher: str = ""
+    topic: str = ""
     start: time | None = None
     end: time | None = None
 

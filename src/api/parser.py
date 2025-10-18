@@ -38,7 +38,8 @@ def parse_lesson(js: Dict[str, Any]) -> Lesson:
         name=js["name"],
         num=js["num"],
         room=js["room"],
-        teacher=js["teacher"]
+        teacher=js["teacher"],
+        topic=js.get("topic", "")
     )
 
     if "starttime" in js and "endtime" in js:
