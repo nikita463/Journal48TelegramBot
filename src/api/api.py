@@ -1,5 +1,5 @@
 import aiohttp
-from typing import Dict
+from typing import Dict, List
 from datetime import date
 
 from .consts import *
@@ -14,7 +14,7 @@ async def get_aiohttp_session() -> aiohttp.ClientSession:
         aiohttp_session = aiohttp.ClientSession(headers=HEADERS)
     return aiohttp_session
 
-async def get_diary(start: date, end: date, vendor: Vendor, student_name: str) -> Dict[str, Student]:
+async def get_diary(start: date, end: date, vendor: Vendor, student_name: str) -> Dict[str, Student] | None:
     await get_aiohttp_session()
 
     days = f"{start:%Y%m%d}-{end:%Y%m%d}"
@@ -27,18 +27,26 @@ async def get_diary(start: date, end: date, vendor: Vendor, student_name: str) -
     }
 
     async with aiohttp_session.get(API_GET_DIARY, params=params) as response:
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except aiohttp.ClientError as exp:
+            print("[ERROR] get_diary():", str(exp))
+            return None
         js = await response.json()
 
     return parse_diary(js)
 
-async def get_vendors(v_token: str):
+async def get_vendors(v_token: str) -> List[Vendor] | None:
     await get_aiohttp_session()
 
     params = {"v_token": v_token}
 
     async with aiohttp_session.get(API_GET_VENDORS, params=params) as response:
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except aiohttp.ClientError as exp:
+            print("[ERROR] get_vendors():", str(exp))
+            return None
         js = await response.json()
 
     return parse_vendors(js)
