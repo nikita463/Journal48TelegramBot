@@ -43,10 +43,10 @@ def check_user(user: User, whitelistusers) -> bool:
         print(f"Request from unknown user, id: {user.id}, username: {user.username}")
     return False
 
-def get_homeworks_dict(student: Student) -> Dict[int, Lesson]:
-    result: Dict[int, Lesson] = dict()
+def get_homeworks_dict(student: Student) -> List[Lesson]:
+    result: List[Lesson] = []
     for day in student.days:
         for lesson in day.lessons:
             if len(lesson.homeworks) > 0:
-                result[lesson.id] = lesson
+                result.append(lesson)
     return result

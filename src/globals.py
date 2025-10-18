@@ -1,5 +1,5 @@
 import asyncio
-from typing import Dict
+from typing import Dict, List
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 from dataclasses import dataclass
@@ -18,7 +18,7 @@ class Data:
 
 data: Data | None = None
 weeks_diary: Dict[str, Student] = dict()
-homeworks_dict: Dict[str, Dict[int, Lesson]] = dict()
+homeworks_list: Dict[str, List[Lesson]] = dict()
 
 async def load_data(json_path: str):
     global data
@@ -61,9 +61,9 @@ async def update_diary():
         else:
             weeks_diary[key] = new_student
 
-    homeworks_dict.clear()
+    homeworks_list.clear()
     for student_name, student in weeks_diary.items():
-        homeworks_dict.update({student_name: get_homeworks_dict(student)})
+        homeworks_list.update({student_name: get_homeworks_dict(student)})
 
     print("diary updated")
 
