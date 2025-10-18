@@ -5,7 +5,7 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from utils import find_by_date
 from api.typings import Homework, Lesson, Day
-from globals import weeks_diary, homeworks_dict
+from globals import weeks_diary, homeworks_list
 
 locale.setlocale(locale.LC_TIME, "ru_RU.UTF-8")
 
@@ -169,7 +169,7 @@ def gen_week_diary_msg(next_date: date, student_name: str) -> dict:
     }
 
 
-def gen_homeworks_list(dt: date, student_name: str) -> str:
+def gen_day_homeworks_list(dt: date, student_name: str) -> str:
     result = "📝 <b>Домашние задания на "
     name = get_day_name(dt, False)
     if name != "":
@@ -177,7 +177,7 @@ def gen_homeworks_list(dt: date, student_name: str) -> str:
     result += dt.strftime("%A, %d %B %Y").lower() + "</b>\n\n"
 
     hw_lessons: List[Lesson] = []
-    for lesson_id, lesson in homeworks_dict[student_name].items():
+    for lesson in homeworks_list[student_name]:
         if lesson.date == dt:
             hw_lessons.append(lesson)
     ind = 1
@@ -187,13 +187,45 @@ def gen_homeworks_list(dt: date, student_name: str) -> str:
 
     return result
 
-def gen_next_homeworks_list(student_name: str) -> dict:
-    dt = date.today() + timedelta(days=1)
-    if dt.weekday() == 5:
-        dt += timedelta(days=2)
-    elif dt.weekday() == 6:
-        dt += timedelta(days=1)
+def gen_week_homeworks_list(next_date: date, student_name: str) -> dict:
+    st_day = next_date.weekday()
+    monday = next_date - timedelta(days=next_date.weekday())
+    if st_day >= 5:
+        st_day = 0
+        monday += timedelta(weeks=1)
+
+    date_buttons = []
+    for i in range(0, 5):
+        if i == st_day:
+            text = "🟢 " + (monday + timedelta(days=i)).strftime("%d %b")
+        else:
+            text = (monday + timedelta(days=i)).strftime("%d %b")
+        button = InlineKeyboardButton(
+            text=text,
+            callback_data=f"homeworks_list_" + (monday + timedelta(days=i)).isoformat()
+        )
+        date_buttons.append(button)
+
+    current_monday = date.today() - timedelta(days=date.today().weekday())
+    if current_monday == monday:
+        change_week_button = InlineKeyboardButton(
+            text="Следующая неделя",
+            callback_data=f"homeworks_list_" + (monday + timedelta(weeks=1)).isoformat()
+        )
+    else:
+        next_week_date = date.today()
+        if date.today().weekday() >= 5:
+            next_week_date = current_monday + timedelta(days=4)
+        change_week_button = InlineKeyboardButton(
+            text="Предыдущая неделя",
+            callback_data=f"homeworks_list_" + next_week_date.isoformat()
+        )
+
+    text = gen_day_homeworks_list(monday + timedelta(st_day), student_name)
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[date_buttons[:2], date_buttons[2:], [change_week_button]])
+
     return {
-        "text": gen_homeworks_list(dt, student_name),
+        "text": text,
+        "reply_markup": keyboard,
         "parse_mode": "HTML"
     }

@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from os import getenv
 
 import globals
-from gen_messages import gen_today_diary, gen_tomorrow_diary, gen_week_diary_msg, gen_next_homeworks_list
+from gen_messages import gen_today_diary, gen_tomorrow_diary, gen_week_diary_msg, gen_week_homeworks_list
 from utils import check_user
 
 from aiogram import Bot, Dispatcher, F
@@ -59,11 +59,26 @@ async def callback_week_timetable(callback: CallbackQuery):
         if "message is not modified" not in exp.message:
             print("[ERROR]", exp.message)
 
+
 @dp.message(Command("homework"))
-async def handle_next_homeworks_list(message: Message):
+async def handle_week_homeworks_list(message: Message):
     if check_user(message.from_user, whitelistusers): return
 
-    await message.answer(**gen_next_homeworks_list(globals.data.student_name))
+    await message.answer(**gen_week_homeworks_list(date.today(), globals.data.student_name))
+
+@dp.callback_query(F.data.startswith("homeworks_list"))
+async def callback_week_timetable(callback: CallbackQuery):
+    if check_user(callback.from_user, whitelistusers): return
+
+    callback_data = callback.data.removeprefix("homeworks_list_")
+    next_date = date.fromisoformat(callback_data)
+
+    await callback.answer()
+    try:
+        await callback.message.edit_text(**gen_week_homeworks_list(next_date, globals.data.student_name))
+    except TelegramBadRequest as exp:
+        if "message is not modified" not in exp.message:
+            print("[ERROR]", exp.message)
 
 
 async def main():
