@@ -11,6 +11,11 @@ ENV LANGUAGE=ru_RU:ru
 ENV LC_ALL=ru_RU.UTF-8
 ENV PYTHONIOENCODING=utf-8
 
+RUN apt-get install -y tzdata && \
+    ln -snf /usr/share/zoneinfo/Europe/Moscow /etc/localtime && \
+    echo "Europe/Moscow" > /etc/timezone && \
+    dpkg-reconfigure -f noninteractive tzdata
+
 ENV PYTHONUNBUFFERED=1
 
 COPY requirements.txt .
