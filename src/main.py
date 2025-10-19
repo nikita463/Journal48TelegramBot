@@ -92,6 +92,9 @@ async def callback_week_timetable(callback: CallbackQuery):
     if check_user(callback.from_user, whitelistusers): return
 
     callback_data = callback.data.removeprefix("lesson_detail_")
+    prev_msg = callback_data[:callback_data.find("_")]
+
+    callback_data = callback_data[callback_data.find("_") + 1:]
     lesson_num = int(callback_data[:callback_data.find("_")])
 
     callback_data = callback_data[callback_data.find("_") + 1:]
@@ -99,7 +102,7 @@ async def callback_week_timetable(callback: CallbackQuery):
 
     await callback.answer()
     try:
-        await callback.message.edit_text(**gen_lesson_detail(lesson_date, lesson_num, globals.data.student_name))
+        await callback.message.edit_text(**gen_lesson_detail(lesson_date, lesson_num, prev_msg, globals.data.student_name))
     except TelegramBadRequest as exp:
         if "message is not modified" not in exp.message:
             print("[ERROR]", exp.message)

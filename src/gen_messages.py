@@ -171,8 +171,25 @@ def gen_week_diary_msg(next_date: date, student_name: str) -> dict:
             callback_data=f"week_timetable_" + next_week_date.isoformat()
         )
 
+    lessons_button_tip = InlineKeyboardButton(text="Подробности уроков", callback_data="tip_lesson_detail")
+
+    lessons_buttons = []
+    day = find_by_date(weeks_diary, monday + timedelta(days=st_day), student_name)
+    if day:
+        for lesson in day.lessons:
+            lessons_buttons.append(InlineKeyboardButton(
+                text=lesson.num,
+                callback_data=f"lesson_detail_week_{int(lesson.num) - 1}_{(monday + timedelta(days=st_day)).isoformat()}"
+            ))
+
     text = gen_day_diary(monday + timedelta(st_day), student_name)
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[date_buttons[:2], date_buttons[2:], [change_week_button]])
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [lessons_button_tip],
+        lessons_buttons,
+        date_buttons[:2],
+        date_buttons[2:],
+        [change_week_button]
+    ])
 
     return {
         "text": text,
@@ -238,7 +255,7 @@ def gen_week_homeworks_list(next_date: date, student_name: str) -> dict:
         if lesson.date == monday + timedelta(days=st_day):
             lessons_buttons.append(InlineKeyboardButton(
                 text=lesson.num,
-                callback_data=f"lesson_detail_{int(lesson.num) - 1}_{(monday + timedelta(days=st_day)).isoformat()}"
+                callback_data=f"lesson_detail_homework_{int(lesson.num) - 1}_{(monday + timedelta(days=st_day)).isoformat()}"
             ))
 
     text = gen_day_homeworks_list(monday + timedelta(days=st_day), student_name)
@@ -257,7 +274,7 @@ def gen_week_homeworks_list(next_date: date, student_name: str) -> dict:
     }
 
 
-def gen_lesson_detail(dt: date, lesson_num: int, student_name: str) -> dict:
+def gen_lesson_detail(dt: date, lesson_num: int, prev_msg: str, student_name: str) -> dict:
     lesson = find_by_date(weeks_diary, dt, student_name).lessons[lesson_num]
 
     result = f"<b>📚 {lesson.num}-й урок — "
@@ -267,10 +284,17 @@ def gen_lesson_detail(dt: date, lesson_num: int, student_name: str) -> dict:
     result += lesson.date.strftime("%d %B %Y").lower() + "</b>\n\n"
     result += gen_lesson_description(lesson, end_time=True, room=True, topic=True, teacher=True)
 
-    return_button = InlineKeyboardButton(
-        text="Назад",
-        callback_data=f"homeworks_list_{lesson.date.isoformat()}"
-    )
+    return_button = None
+    if prev_msg == "homework":
+        return_button = InlineKeyboardButton(
+            text="Назад",
+            callback_data=f"homeworks_list_{lesson.date.isoformat()}"
+        )
+    elif prev_msg == "week":
+        return_button = InlineKeyboardButton(
+            text="Назад",
+            callback_data=f"week_timetable_{lesson.date.isoformat()}"
+        )
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [return_button]
     ])
