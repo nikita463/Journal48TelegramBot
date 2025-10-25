@@ -137,22 +137,22 @@ def gen_tomorrow_diary(student_name: str) -> dict:
         "parse_mode": "HTML"
     }
 
-def gen_week_diary_msg(next_date: date, student_name: str) -> dict:
-    st_day = next_date.weekday()
-    monday = next_date - timedelta(days=next_date.weekday())
-    if st_day >= 5:
-        st_day = 0
+def gen_week_diary_msg(selected_date: date, student_name: str) -> dict:
+    monday = selected_date - timedelta(days=selected_date.weekday())
+    if selected_date.weekday() >= 5:
         monday += timedelta(weeks=1)
+        selected_date = monday
 
     date_buttons = []
     for i in range(0, 5):
-        if i == st_day:
-            text = "🟢 " + (monday + timedelta(days=i)).strftime("%d %b")
+        curr_date = monday + timedelta(days=i)
+        if i == selected_date.weekday():
+            text = "🟢 " + curr_date.strftime("%d %b")
         else:
-            text = (monday + timedelta(days=i)).strftime("%d %b")
+            text = curr_date.strftime("%d %b")
         button = InlineKeyboardButton(
             text=text,
-            callback_data=f"week_timetable_" + (monday + timedelta(days=i)).isoformat()
+            callback_data=f"week_timetable_" + curr_date.isoformat()
         )
         date_buttons.append(button)
 
@@ -167,22 +167,22 @@ def gen_week_diary_msg(next_date: date, student_name: str) -> dict:
         if date.today().weekday() >= 5:
             next_week_date = current_monday + timedelta(days=4)
         change_week_button = InlineKeyboardButton(
-            text="Предыдущая неделя",
+            text="Текущая неделя",
             callback_data=f"week_timetable_" + next_week_date.isoformat()
         )
 
     lessons_button_tip = InlineKeyboardButton(text="Подробности уроков", callback_data="tip_lesson_detail")
 
     lessons_buttons = []
-    day = find_by_date(weeks_diary, monday + timedelta(days=st_day), student_name)
+    day = find_by_date(weeks_diary, selected_date, student_name)
     if day:
         for lesson in day.lessons:
             lessons_buttons.append(InlineKeyboardButton(
                 text=lesson.num,
-                callback_data=f"lesson_detail_week_{int(lesson.num) - 1}_{(monday + timedelta(days=st_day)).isoformat()}"
+                callback_data=f"lesson_detail_week_{int(lesson.num) - 1}_{selected_date.isoformat()}"
             ))
 
-    text = gen_day_diary(monday + timedelta(st_day), student_name)
+    text = gen_day_diary(selected_date, student_name)
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [lessons_button_tip],
         lessons_buttons,
@@ -214,16 +214,15 @@ def gen_day_homeworks_list(dt: date, student_name: str) -> str:
 
     return result
 
-def gen_week_homeworks_list(next_date: date, student_name: str) -> dict:
-    st_day = next_date.weekday()
-    monday = next_date - timedelta(days=next_date.weekday())
-    if st_day >= 5:
-        st_day = 0
+def gen_week_homeworks_list(selected_date: date, student_name: str) -> dict:
+    monday = selected_date - timedelta(days=selected_date.weekday())
+    if selected_date.weekday() >= 5:
         monday += timedelta(weeks=1)
+        selected_date = monday
 
     date_buttons = []
     for i in range(0, 5):
-        if i == st_day:
+        if i == selected_date.weekday():
             text = "🟢 " + (monday + timedelta(days=i)).strftime("%d %b")
         else:
             text = (monday + timedelta(days=i)).strftime("%d %b")
@@ -244,7 +243,7 @@ def gen_week_homeworks_list(next_date: date, student_name: str) -> dict:
         if date.today().weekday() >= 5:
             next_week_date = current_monday + timedelta(days=4)
         change_week_button = InlineKeyboardButton(
-            text="Предыдущая неделя",
+            text="Текущая неделя",
             callback_data=f"homeworks_list_" + next_week_date.isoformat()
         )
 
@@ -252,13 +251,13 @@ def gen_week_homeworks_list(next_date: date, student_name: str) -> dict:
 
     lessons_buttons = []
     for lesson in homeworks_list[student_name]:
-        if lesson.date == monday + timedelta(days=st_day):
+        if lesson.date == selected_date:
             lessons_buttons.append(InlineKeyboardButton(
                 text=lesson.num,
-                callback_data=f"lesson_detail_homework_{int(lesson.num) - 1}_{(monday + timedelta(days=st_day)).isoformat()}"
+                callback_data=f"lesson_detail_homework_{int(lesson.num) - 1}_{selected_date.isoformat()}"
             ))
 
-    text = gen_day_homeworks_list(monday + timedelta(days=st_day), student_name)
+    text = gen_day_homeworks_list(selected_date, student_name)
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [lessons_button_tip],
         lessons_buttons,
