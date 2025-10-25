@@ -5,7 +5,7 @@ from os import getenv
 
 import globals
 from gen_messages import gen_today_diary, gen_tomorrow_diary, gen_week_diary_msg, gen_week_homeworks_list, gen_lesson_detail
-from utils import check_user, find_by_date
+from utils import check_user
 
 from aiogram import Bot, Dispatcher, F
 from aiogram.filters import Command
@@ -110,7 +110,6 @@ async def callback_week_timetable(callback: CallbackQuery):
 
 async def main():
     update_diary_interval = 10 * 60
-    await globals.load_data("data.json")
     await globals.run_update_diary(update_diary_interval)
     await dp.start_polling(bot)
 

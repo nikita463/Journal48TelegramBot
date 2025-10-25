@@ -1,29 +1,17 @@
 import asyncio
 from typing import Dict, List
-from datetime import datetime, timedelta
-from zoneinfo import ZoneInfo
-from dataclasses import dataclass
-import json
+from datetime import date, timedelta
 
 from api.api import get_diary, get_vendors
 from api.typings import Student, Lesson
 from utils import run_every, get_homeworks_dict
+from db import User, Session
 
-TZ = ZoneInfo("Europe/Moscow")
-
-@dataclass
-class Data:
-    v_token: str
-    student_name: str
-
-data: Data | None = None
 weeks_diary: Dict[str, Student] = dict()
 homeworks_list: Dict[str, List[Lesson]] = dict()
 
-async def load_data(json_path: str):
-    global data
-    with open(json_path, "rb") as f:
-        data = Data(**json.load(f))
+with Session() as session:
+    data = session.query(User).first()
 
 async def update_diary():
     global weeks_diary
@@ -34,10 +22,10 @@ async def update_diary():
         return
     vendor = vendor[0]
 
-    today = datetime.now(TZ).date()
+    today = date.today()
     weekday = today.weekday()
 
-    start_of_current_week = (today - timedelta(days=weekday))
+    start_of_current_week = today - timedelta(days=weekday)
     end_of_current_week = start_of_current_week + timedelta(days=6)
     start_of_next_week = start_of_current_week + timedelta(days=7)
     end_of_next_week = start_of_next_week + timedelta(days=6)

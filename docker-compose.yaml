@@ -1,7 +1,7 @@
 services:
-  app:
+  schools48bot:
     build: .
     container_name: schools48bot
     volumes:
       - ./.env:/app/.env
-      - ./data.json:/app/data.json
+      - ./db.db:/app/db.db

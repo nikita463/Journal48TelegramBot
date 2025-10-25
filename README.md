@@ -8,11 +8,6 @@ curl -Lo docker-compose.yaml https://raw.githubusercontent.com/nikita463/Journal
 curl -Lo .env https://raw.githubusercontent.com/nikita463/Journal48TelegramBot/refs/heads/master/.env-example
 ```
 
-### data.json file
-```bash
-curl -Lo data.json https://raw.githubusercontent.com/nikita463/Journal48TelegramBot/refs/heads/master/data-example.json
-```
-
 ---
 
 ### Docker compose up
