@@ -4,4 +4,6 @@ services:
     container_name: schools48bot
     volumes:
       - ./.env:/app/.env
-      - ./db.db:/app/db.db
+      - data:/data
+volumes:
+  data:
