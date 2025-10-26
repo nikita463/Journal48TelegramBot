@@ -2,6 +2,8 @@ services:
   schools48bot:
     image: xupdates/journal48telegrambot-app
     container_name: schools48bot
+    env_file:
+      - .env
     volumes:
       - ./.env:/app/.env
       - data:/data

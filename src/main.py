@@ -1,6 +1,5 @@
 import asyncio
 from datetime import date
-from dotenv import load_dotenv
 from os import getenv
 
 import globals
@@ -12,7 +11,6 @@ from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery
 from aiogram.exceptions import TelegramBadRequest
 
-load_dotenv(".env")
 token = getenv("BOT_TOKEN", "")
 whitelistusers = list(map(int, getenv("WHITELISTUSERS", "").split(",")))
 bot = Bot(token)
